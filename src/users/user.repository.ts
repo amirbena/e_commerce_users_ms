@@ -34,6 +34,10 @@ export class UserRepoistory extends Repository<User>{
 
     async updateUser(updateDetails: UserUpdate): Promise<User | null> {
         const { id, userToUpdate } = updateDetails;
+        if (userToUpdate.password) {
+            const salt = 10;
+            userToUpdate.password = await hash(userToUpdate.password, salt);
+        }
         const result = await this.update(id, userToUpdate);
         if (result.affected) return null;
         return await this.findOne(id);
@@ -42,5 +46,18 @@ export class UserRepoistory extends Repository<User>{
     async removeUser(id: string) {
         const result = await this.delete(id);
         return result.affected;
+    }
+
+    async getAllUsers() {
+        return await this.find();
+    }
+
+    async getSpecificUser(id: string) {
+        return await this.findOne(id);
+    }
+
+    async updateRole(id: string, role: Roles) {
+        const updated = await this.update({ role }, { id });
+        return updated.affected;
     }
 }
